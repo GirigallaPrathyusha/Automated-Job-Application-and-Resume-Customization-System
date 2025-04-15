@@ -7,6 +7,8 @@ import { FileUp, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useResume } from '@/contexts/ResumeContext';
 import { motion } from 'framer-motion';
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
+import { ChartContainer, ChartTooltip } from '@/components/ui/chart';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -17,6 +19,12 @@ export default function DashboardPage() {
   const successfulApplications = applications.filter(app => app.status === 'Submitted Successfully').length;
   const failedApplications = applications.filter(app => app.status === 'Submission Failed').length;
   const processingApplications = applications.filter(app => app.status === 'Processing').length;
+
+  const chartData = [
+    { name: 'Successful', value: successfulApplications, color: '#10B981' },
+    { name: 'Processing', value: processingApplications, color: '#60A5FA' },
+    { name: 'Failed', value: failedApplications, color: '#EF4444' },
+  ];
 
   const container = {
     hidden: { opacity: 0 },
@@ -112,6 +120,27 @@ export default function DashboardPage() {
           </Card>
         </motion.div>
       </div>
+
+      <motion.div variants={item} className="mt-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Application Statistics</CardTitle>
+            <CardDescription>Overview of your job applications</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="var(--appPurple)" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </motion.div>
   );
 }

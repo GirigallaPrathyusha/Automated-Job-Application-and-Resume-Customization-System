@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +15,8 @@ import DashboardPage from "./pages/Dashboard/DashboardPage";
 import UploadResumePage from "./pages/Resume/UploadResumePage";
 import ApplicationStatusPage from "./pages/Applications/ApplicationStatusPage";
 import NotificationsPage from "./pages/Notifications/NotificationsPage";
+import ContactPage from "./pages/Contact/ContactPage";
+import ProfilePage from "./pages/Profile/ProfilePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,7 +42,8 @@ const App = () => (
                   <Route path="/job-listings" element={<DashboardPage />} />
                   <Route path="/applications" element={<ApplicationStatusPage />} />
                   <Route path="/notifications" element={<NotificationsPage />} />
-                  <Route path="/profile" element={<DashboardPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/contact" element={<ContactPage />} />
                 </Route>
                 
                 <Route path="*" element={<NotFound />} />
