@@ -3,24 +3,52 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ResumeProvider } from "./contexts/ResumeContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
+import { AppLayout } from "./components/Layout/AppLayout";
+import WelcomePage from "./pages/Auth/WelcomePage";
+import LoginPage from "./pages/Auth/LoginPage";
+import SignupPage from "./pages/Auth/SignupPage";
+import DashboardPage from "./pages/Dashboard/DashboardPage";
+import UploadResumePage from "./pages/Resume/UploadResumePage";
+import ApplicationStatusPage from "./pages/Applications/ApplicationStatusPage";
+import NotificationsPage from "./pages/Notifications/NotificationsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <ResumeProvider>
+        <NotificationProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<WelcomePage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
+                
+                {/* Protected Routes */}
+                <Route element={<AppLayout />}>
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/upload-resume" element={<UploadResumePage />} />
+                  <Route path="/job-listings" element={<DashboardPage />} />
+                  <Route path="/applications" element={<ApplicationStatusPage />} />
+                  <Route path="/notifications" element={<NotificationsPage />} />
+                  <Route path="/profile" element={<DashboardPage />} />
+                </Route>
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </NotificationProvider>
+      </ResumeProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
