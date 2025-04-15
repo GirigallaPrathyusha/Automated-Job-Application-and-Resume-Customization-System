@@ -1,4 +1,3 @@
-
 // Define types for our application
 
 export interface User {
@@ -10,6 +9,7 @@ export interface User {
   address?: string;
   password: string;
   resume?: Resume;
+  location?: string;
 }
 
 export interface Resume {
