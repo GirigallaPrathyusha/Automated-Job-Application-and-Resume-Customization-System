@@ -8,7 +8,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useResume } from '@/contexts/ResumeContext';
 import { motion } from 'framer-motion';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
-import { ChartContainer, ChartTooltip } from '@/components/ui/chart';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -48,8 +47,11 @@ export default function DashboardPage() {
       animate="show"
       className="space-y-8"
     >
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+      <div>
+        <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+        <h2 className="text-xl text-gray-600 mb-6">
+          Welcome back, {user?.firstName || 'User'}! 👋
+        </h2>
         {!resume ? (
           <Link to="/upload-resume">
             <Button className="bg-appPurple hover:bg-appSecondary">

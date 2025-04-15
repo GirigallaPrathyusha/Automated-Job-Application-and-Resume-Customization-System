@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +17,7 @@ import NotificationsPage from "./pages/Notifications/NotificationsPage";
 import ContactPage from "./pages/Contact/ContactPage";
 import ProfilePage from "./pages/Profile/ProfilePage";
 import NotFound from "./pages/NotFound";
+import JobListingsPage from "./pages/Jobs/JobListingsPage";
 
 const queryClient = new QueryClient();
 
@@ -35,11 +35,10 @@ const App = () => (
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
                 
-                {/* Protected Routes */}
                 <Route element={<AppLayout />}>
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/upload-resume" element={<UploadResumePage />} />
-                  <Route path="/job-listings" element={<DashboardPage />} />
+                  <Route path="/job-listings" element={<JobListingsPage />} />
                   <Route path="/applications" element={<ApplicationStatusPage />} />
                   <Route path="/notifications" element={<NotificationsPage />} />
                   <Route path="/profile" element={<ProfilePage />} />

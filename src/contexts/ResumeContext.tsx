@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Resume, Job, Application } from '@/types';
 import { useAuth } from './AuthContext';
@@ -28,11 +27,60 @@ export const ResumeProvider = ({ children }: { children: React.ReactNode }) => {
       
       // Get job recommendations based on resume
       getMockJobRecommendations(user.resume);
-    }
-    
-    const storedApplications = localStorage.getItem(`jobApp_applications_${user?.id}`);
-    if (storedApplications) {
-      setApplications(JSON.parse(storedApplications));
+      
+      // Add sample applications data
+      const sampleApplications: Application[] = [
+        {
+          id: '1',
+          jobId: '1',
+          userId: user.id,
+          status: 'Submitted Successfully',
+          submissionDate: '2025-04-10T10:00:00Z',
+          resume: user.resume,
+          job: {
+            title: 'Senior Frontend Developer',
+            company: 'Google'
+          }
+        },
+        {
+          id: '2',
+          jobId: '2',
+          userId: user.id,
+          status: 'Processing',
+          submissionDate: '2025-04-12T15:30:00Z',
+          resume: user.resume,
+          job: {
+            title: 'Full Stack Engineer',
+            company: 'Microsoft'
+          }
+        },
+        {
+          id: '3',
+          jobId: '3',
+          userId: user.id,
+          status: 'Submission Failed',
+          submissionDate: '2025-04-13T09:15:00Z',
+          resume: user.resume,
+          job: {
+            title: 'React Developer',
+            company: 'Meta'
+          }
+        },
+        {
+          id: '4',
+          jobId: '4',
+          userId: user.id,
+          status: 'Shortlisted',
+          submissionDate: '2025-04-14T11:45:00Z',
+          resume: user.resume,
+          job: {
+            title: 'UI/UX Developer',
+            company: 'Apple'
+          }
+        }
+      ];
+      
+      setApplications(sampleApplications);
     }
   }, [user]);
 
