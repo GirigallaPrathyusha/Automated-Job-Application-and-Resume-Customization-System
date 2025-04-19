@@ -1,85 +1,198 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User } from '@/types';
+import { supabase } from '@/lib/supabase';
+import { Session, User } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
+  loading: boolean;
   isAuthenticated: boolean;
+  signupWithEmail: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
+  signupWithGoogle: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
-  signup: (userData: Omit<User, 'id'>) => Promise<void>;
-  logout: () => void;
-  updateUser: (userData: Partial<User>) => void;
+  loginWithGoogle: () => Promise<void>;
+  logout: () => Promise<void>;
+  getUserProfile: () => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Load user from localStorage on initial render
   useEffect(() => {
-    const storedUser = localStorage.getItem('jobApp_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  const login = async (email: string, password: string) => {
-    // In a real app, you'd make an API call here
-    // For now, we'll simulate by checking localStorage
-    const storedUsers = JSON.parse(localStorage.getItem('jobApp_users') || '[]');
-    const foundUser = storedUsers.find((u: User) => u.email === email && u.password === password);
-    
-    if (foundUser) {
-      setUser(foundUser);
-      setIsAuthenticated(true);
-      localStorage.setItem('jobApp_user', JSON.stringify(foundUser));
-    } else {
-      throw new Error('Invalid email or password');
-    }
-  };
-
-  const signup = async (userData: Omit<User, 'id'>) => {
-    // In a real app, you'd make an API call here
-    const newUser = {
-      ...userData,
-      id: Math.random().toString(36).substring(2, 9),
+    const getSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Error getting session:', error);
+      }
+      
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
     };
 
-    // Store in localStorage for demo purposes
-    const storedUsers = JSON.parse(localStorage.getItem('jobApp_users') || '[]');
-    storedUsers.push(newUser);
-    localStorage.setItem('jobApp_users', JSON.stringify(storedUsers));
-    
-    // Auto login
-    setUser(newUser as User);
-    setIsAuthenticated(true);
-    localStorage.setItem('jobApp_user', JSON.stringify(newUser));
+    getSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signupWithEmail = async (email: string, password: string, firstName: string, lastName: string) => {
+    const { error: userError } = await supabase
+      .from('signup')
+      .insert([
+        {
+          first_name: firstName,
+          last_name: lastName,
+          email: email,
+          password: password,
+        }
+      ]);
+  
+    if (userError) throw userError;
   };
 
-  const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem('jobApp_user');
+  const signupWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) throw error;
   };
 
-  const updateUser = (userData: Partial<User>) => {
-    if (user) {
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-      localStorage.setItem('jobApp_user', JSON.stringify(updatedUser));
+  const login = async (email: string, password: string) => {
+    const { data: userData, error: userError } = await supabase
+      .from('signup')
+      .select('*')
+      .eq('email', email)
+      .eq('password', password)
+      .single();
+  
+    if (userError) {
+      if (userError.code === 'PGRST116') {
+        throw new Error('Invalid email or password. Please try again.');
+      }
+      throw new Error('An error occurred while checking your account');
+    }
+  
+    if (userData) {
+      const customUser = {
+        id: userData.id,
+        email: userData.email,
+        app_metadata: {},
+        user_metadata: {
+          first_name: userData.first_name,
+          last_name: userData.last_name
+        },
+        aud: 'authenticated',
+        created_at: userData.created_at || new Date().toISOString()
+      } as unknown as User;
       
-      // Also update in users array
-      const storedUsers = JSON.parse(localStorage.getItem('jobApp_users') || '[]');
-      const updatedUsers = storedUsers.map((u: User) => u.id === user.id ? updatedUser : u);
-      localStorage.setItem('jobApp_users', JSON.stringify(updatedUsers));
+      setUser(customUser);
+      
+      const customSession = {
+        access_token: 'custom_token_' + userData.id,
+        refresh_token: 'custom_refresh_' + userData.id,
+        expires_in: 3600,
+        token_type: 'bearer',
+        user: customUser
+      } as unknown as Session;
+      
+      setSession(customSession);
     }
   };
 
+  const loginWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) throw error;
+  };
+
+  const logout = async () => {
+    if (user && session) {
+      await supabase.auth.signOut();
+    }
+    
+    setUser(null);
+    setSession(null);
+  };
+
+  const getUserProfile = async () => {
+    if (!user) return null;
+  
+    if (user.email) {
+      const { data, error } = await supabase
+        .from('Users')
+        .select('*')
+        .eq('email', user.email)
+        .single();
+    
+      if (!error && data) return data;
+      
+      if (error && error.code === 'PGRST116' && user.app_metadata?.provider === 'google') {
+        const { data: newUser, error: insertError } = await supabase
+          .from('signup')
+          .insert([
+            {
+              first_name: user.user_metadata?.full_name?.split(' ')[0] || '',
+              last_name: user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || '',
+              email: user.email,
+              auth_provider: 'google',
+              auth_id: user.id
+            }
+          ])
+          .select()
+          .single();
+          
+        if (insertError) throw insertError;
+        return newUser;
+      }
+      
+      if (error) throw error;
+    }
+    
+    return {
+      id: user.id,
+      email: user.email,
+      first_name: user.user_metadata?.first_name,
+      last_name: user.user_metadata?.last_name
+    };
+  };
+
+  const isAuthenticated = !!user;
+
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, signup, logout, updateUser }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        loading,
+        isAuthenticated,
+        signupWithEmail,
+        signupWithGoogle,
+        login,
+        loginWithGoogle,
+        logout,
+        getUserProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

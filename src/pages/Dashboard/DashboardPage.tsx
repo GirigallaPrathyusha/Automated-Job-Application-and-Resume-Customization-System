@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,22 +6,22 @@ import { FileUp, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useResume } from '@/contexts/ResumeContext';
 import { motion } from 'framer-motion';
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell } from 'recharts';
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { resume, applications } = useResume();
+  const { resume, applications = [] } = useResume();
 
-  // Calculate application statistics
+  // Stats
   const totalApplications = applications.length;
   const successfulApplications = applications.filter(app => app.status === 'Submitted Successfully').length;
   const failedApplications = applications.filter(app => app.status === 'Submission Failed').length;
   const processingApplications = applications.filter(app => app.status === 'Processing').length;
 
   const chartData = [
-    { name: 'Successful', value: successfulApplications, color: '#10B981' },
-    { name: 'Processing', value: processingApplications, color: '#60A5FA' },
-    { name: 'Failed', value: failedApplications, color: '#EF4444' },
+    { name: 'Success', value: successfulApplications, fill: '#10B981' },
+    { name: 'Processing', value: processingApplications, fill: '#3B82F6' },
+    { name: 'Failed', value: failedApplications, fill: '#EF4444' },
   ];
 
   const container = {
@@ -50,7 +49,7 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
         <h2 className="text-xl text-gray-600 mb-6">
-          Welcome back, {user?.firstName || 'User'}! 👋
+          Welcome back, {user?.user_metadata?.first_name || user?.email?.split('@')[0] || 'User'}! 👋
         </h2>
         {!resume ? (
           <Link to="/upload-resume">
@@ -70,18 +69,16 @@ export default function DashboardPage() {
               <CardTitle className="text-3xl">{totalApplications}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-xs text-gray-500">
-                All time applications
-              </div>
+              <div className="text-xs text-gray-500">All time applications</div>
             </CardContent>
           </Card>
         </motion.div>
-        
+
         <motion.div variants={item}>
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Successfully Submitted</CardDescription>
-              <CardTitle className="text-3xl text-success">{successfulApplications}</CardTitle>
+              <CardTitle className="text-3xl text-green-500">{successfulApplications}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-xs text-gray-500">
@@ -91,12 +88,12 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </motion.div>
-        
+
         <motion.div variants={item}>
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Processing</CardDescription>
-              <CardTitle className="text-3xl text-info">{processingApplications}</CardTitle>
+              <CardTitle className="text-3xl text-blue-500">{processingApplications}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-xs text-gray-500">
@@ -106,12 +103,12 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </motion.div>
-        
+
         <motion.div variants={item}>
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Failed Submissions</CardDescription>
-              <CardTitle className="text-3xl text-error">{failedApplications}</CardTitle>
+              <CardTitle className="text-3xl text-red-500">{failedApplications}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-xs text-gray-500">
@@ -136,7 +133,11 @@ export default function DashboardPage() {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="value" fill="var(--appPurple)" />
+                  <Bar dataKey="value">
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>

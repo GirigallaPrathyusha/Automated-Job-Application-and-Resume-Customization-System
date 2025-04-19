@@ -8,6 +8,13 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    open: true, // Automatically open browser
+    hmr: {
+      overlay: true, // Show errors as overlay
+    },
+    watch: {
+      usePolling: true, // Use polling for file changes
+    },
   },
   plugins: [
     react(),
@@ -17,6 +24,20 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "three": path.resolve(__dirname, "./node_modules/three"), // Add Three.js alias
     },
   },
+  build: {
+    sourcemap: true, // Generate sourcemaps for debugging
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          three: ['three', '@react-three/fiber', '@react-three/drei'],
+        },
+      },
+    },
+  },
+  // Add logging
+  logLevel: 'info',
 }));

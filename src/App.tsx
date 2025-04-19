@@ -18,6 +18,7 @@ import ContactPage from "./pages/Contact/ContactPage";
 import ProfilePage from "./pages/Profile/ProfilePage";
 import NotFound from "./pages/NotFound";
 import JobListingsPage from "./pages/Jobs/JobListingsPage";
+import AuthCallback from '@/pages/Auth/AuthCallback';
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
                   <Route path="/contact" element={<ContactPage />} />
                 </Route>
                 
+                <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

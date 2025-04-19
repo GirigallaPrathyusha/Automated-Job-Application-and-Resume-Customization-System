@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,22 +10,55 @@ import { Label } from '@/components/ui/label';
 import { PencilIcon, User, Lock, Save } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/lib/supabase';
 
 export default function ProfilePage() {
-  const { user, updateUser } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-    location: user?.location || '',
-    phone: user?.phone || '',
+    firstName: '',
+    lastName: '',
+    email: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!user?.email) return;
+
+      const { data, error } = await supabase
+        .from('signup')
+        .select('first_name, last_name, email')
+        .eq('email', user.email)
+        .single();
+
+      if (error) {
+        toast({
+          title: 'Error fetching profile',
+          description: error.message,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      setFormData({
+        ...formData,
+        firstName: data.first_name || '',
+        lastName: data.last_name || '',
+        email: data.email || '',
+      });
+
+      setLoading(false);
+    };
+
+    fetchUserData();
+  }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -35,44 +67,52 @@ export default function ProfilePage() {
     });
   };
 
-  const handleProfileUpdate = (e: React.FormEvent) => {
+  const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    updateUser({
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      location: formData.location,
-      phone: formData.phone,
-    });
-    
+
+    const { error } = await supabase
+      .from('signup')
+      .update({
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+      })
+      .eq('email', formData.email);
+
+    if (error) {
+      toast({
+        title: 'Update failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     toast({
-      title: "Profile updated",
-      description: "Your profile has been updated successfully",
+      title: 'Profile updated',
+      description: 'Your profile has been updated successfully',
     });
-    
+
     setIsEditing(false);
   };
 
   const handlePasswordUpdate = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (formData.newPassword !== formData.confirmPassword) {
       toast({
         title: "Passwords don't match",
-        description: "New password and confirm password must match",
-        variant: "destructive",
+        description: 'New password and confirm password must match',
+        variant: 'destructive',
       });
       return;
     }
-    
-    // In a real app, you'd validate the current password against the stored one
-    // and use an API to update the password
-    
+
+    // Just a dummy simulation
     toast({
-      title: "Password updated",
-      description: "Your password has been updated successfully",
+      title: 'Password updated',
+      description: 'Your password has been updated successfully (simulated)',
     });
-    
+
     setFormData({
       ...formData,
       currentPassword: '',
@@ -80,6 +120,10 @@ export default function ProfilePage() {
       confirmPassword: '',
     });
   };
+
+  if (loading) {
+    return <div className="p-6 text-center text-lg font-medium">Loading profile...</div>;
+  }
 
   return (
     <motion.div
@@ -89,12 +133,16 @@ export default function ProfilePage() {
     >
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Profile Settings</h1>
-        <Button 
+        <Button
           onClick={() => setIsEditing(!isEditing)}
           variant="outline"
-          className={isEditing ? "bg-secondary" : ""}
+          className={isEditing ? 'bg-secondary' : ''}
         >
-          {isEditing ? 'Cancel' : <><PencilIcon className="mr-2 h-4 w-4" /> Edit Profile</>}
+          {isEditing ? 'Cancel' : (
+            <>
+              <PencilIcon className="mr-2 h-4 w-4" /> Edit Profile
+            </>
+          )}
         </Button>
       </div>
 
@@ -104,14 +152,12 @@ export default function ProfilePage() {
             <div className="flex flex-col sm:flex-row gap-4 items-center sm:items-start">
               <Avatar className="h-24 w-24">
                 <AvatarFallback className="text-2xl bg-appPurple text-white">
-                  {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
+                  {formData.firstName?.charAt(0)}{formData.lastName?.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <div className="space-y-1 text-center sm:text-left">
-                <CardTitle className="text-2xl">{user?.firstName} {user?.lastName}</CardTitle>
-                <p className="text-gray-500">{user?.email}</p>
-                {user?.location && <p className="text-gray-500">{user?.location}</p>}
-                {user?.phone && <p className="text-gray-500">{user?.phone}</p>}
+                <CardTitle className="text-2xl">{formData.firstName} {formData.lastName}</CardTitle>
+                <p className="text-gray-500">{formData.email}</p>
               </div>
             </div>
           </CardHeader>
@@ -126,7 +172,7 @@ export default function ProfilePage() {
               <Lock className="mr-2 h-4 w-4" /> Security
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="account">
             <Card>
               <CardHeader>
@@ -137,8 +183,8 @@ export default function ProfilePage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="firstName">First name</Label>
-                      <Input 
-                        id="firstName" 
+                      <Input
+                        id="firstName"
                         name="firstName"
                         disabled={!isEditing}
                         value={formData.firstName}
@@ -147,8 +193,8 @@ export default function ProfilePage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="lastName">Last name</Label>
-                      <Input 
-                        id="lastName" 
+                      <Input
+                        id="lastName"
                         name="lastName"
                         disabled={!isEditing}
                         value={formData.lastName}
@@ -156,46 +202,21 @@ export default function ProfilePage() {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input 
-                      id="email" 
+                    <Input
+                      id="email"
                       name="email"
                       type="email"
                       disabled={true}
                       value={formData.email}
                     />
                   </div>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="location">Location</Label>
-                      <Input 
-                        id="location" 
-                        name="location"
-                        disabled={!isEditing}
-                        value={formData.location}
-                        onChange={handleChange}
-                        placeholder="City, Country"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone number</Label>
-                      <Input 
-                        id="phone" 
-                        name="phone"
-                        disabled={!isEditing}
-                        value={formData.phone}
-                        onChange={handleChange}
-                        placeholder="+1 (555) 123-4567"
-                      />
-                    </div>
-                  </div>
-                  
+
                   {isEditing && (
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       className="w-full bg-appPurple hover:bg-appSecondary"
                     >
                       <Save className="mr-2 h-4 w-4" /> Save Changes
@@ -205,7 +226,7 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="security">
             <Card>
               <CardHeader>
@@ -215,20 +236,20 @@ export default function ProfilePage() {
                 <form onSubmit={handlePasswordUpdate} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="currentPassword">Current password</Label>
-                    <Input 
-                      id="currentPassword" 
+                    <Input
+                      id="currentPassword"
                       name="currentPassword"
                       type="password"
                       value={formData.currentPassword}
                       onChange={handleChange}
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="newPassword">New password</Label>
-                      <Input 
-                        id="newPassword" 
+                      <Input
+                        id="newPassword"
                         name="newPassword"
                         type="password"
                         value={formData.newPassword}
@@ -237,8 +258,8 @@ export default function ProfilePage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="confirmPassword">Confirm new password</Label>
-                      <Input 
-                        id="confirmPassword" 
+                      <Input
+                        id="confirmPassword"
                         name="confirmPassword"
                         type="password"
                         value={formData.confirmPassword}
@@ -246,9 +267,9 @@ export default function ProfilePage() {
                       />
                     </div>
                   </div>
-                  
-                  <Button 
-                    type="submit" 
+
+                  <Button
+                    type="submit"
                     className="w-full bg-appPurple hover:bg-appSecondary"
                     disabled={!formData.currentPassword || !formData.newPassword || !formData.confirmPassword}
                   >
