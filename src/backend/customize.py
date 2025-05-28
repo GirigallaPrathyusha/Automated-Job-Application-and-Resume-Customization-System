@@ -11,9 +11,9 @@ import time
 import re
 
 # Configuration (same as before)
-SUPABASE_URL = "https://cjftrualbdceboadyieg.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqZnRydWFsYmRjZWJvYWR5aWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NzY0MzIsImV4cCI6MjA2MDU1MjQzMn0.c3WmjKL-y4TNAO-YtSyMUutwrzq_Un-GvrtV9UpygME"
-GEMINI_API_KEY = "AIzaSyCRRo887rXeSZd5nUwrpicydXSIyQWjFw8"
+SUPABASE_URL = "SUPABASE_URL"
+SUPABASE_KEY = "SUPABASE_KEY"
+GEMINI_API_KEY = "GOOGLE_API_KEY"
 MODEL_NAME = "models/gemini-1.5-pro-latest"
 
 # Initialize clients
