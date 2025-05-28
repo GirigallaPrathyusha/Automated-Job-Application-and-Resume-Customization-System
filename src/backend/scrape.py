@@ -9,7 +9,7 @@ SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # ✅ JSearch API config
-JSEARCH_API_KEY = "0402f54bc1mshaa51200e8153a83p1f8b56jsn936393477654"
+JSEARCH_API_KEY = "JSEARCH_API_KEY"
 HEADERS = {
     "X-RapidAPI-Key": JSEARCH_API_KEY,
     "X-RapidAPI-Host": "jsearch.p.rapidapi.com"
