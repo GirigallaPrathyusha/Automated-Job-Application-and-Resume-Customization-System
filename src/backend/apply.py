@@ -18,19 +18,19 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 # Configuration
 SUPABASE_URL = "https://cjftrualbdceboadyieg.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqZnRydWFsYmRjZWJvYWR5aWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NzY0MzIsImV4cCI6MjA2MDU1MjQzMn0.c3WmjKL-y4TNAO-YtSyMUutwrzq_Un-GvrtV9UpygME"
+SUPABASE_KEY = "SUPABASE_KEY"
 
 # LinkedIn credentials
-LINKEDIN_EMAIL = "23215a1205@bvrit.ac.in"
-LINKEDIN_PASSWORD = "@Puppygoud1"
+LINKEDIN_EMAIL = "EMAIL"
+LINKEDIN_PASSWORD = "PASSWORD"
 
 # External website credentials
-EXTERNAL_EMAIL = "23215a1205@bvrit.ac.in"
-EXTERNAL_PASSWORD = "_Prathyusha12"
+EXTERNAL_EMAIL = "EMAIL"
+EXTERNAL_PASSWORD = "PASSWORD"
 
 # Indeed credentials
-INDEED_EMAIL = "kammarianand20@gmailcom"
-INDEED_PASSWORD = "Anand 0142"
+INDEED_EMAIL = "EMAIL"
+INDEED_PASSWORD = "PASSWORD"
 
 # Initialize Supabase client
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
