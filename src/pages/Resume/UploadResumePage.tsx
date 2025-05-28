@@ -7,6 +7,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { FileUp, CheckCircle } from 'lucide-react';
 
 export default function UploadResumePage() {
+  const [isReplacing, setIsReplacing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -29,12 +30,6 @@ export default function UploadResumePage() {
     
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       validateAndSetFile(e.dataTransfer.files[0]);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      validateAndSetFile(e.target.files[0]);
     }
   };
 
@@ -71,7 +66,8 @@ export default function UploadResumePage() {
         title: "Resume uploaded",
         description: "Your resume has been stored successfully",
       });
-      navigate('/dashboard');
+      setIsReplacing(false);
+      navigate('/job-listings'); // Update this path to match your router configuration
     } catch (error) {
       toast({
         title: "Upload failed",
@@ -81,6 +77,24 @@ export default function UploadResumePage() {
     }
   };
 
+  // Modify handleFileChange to handle both cases the same way
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFile = e.target.files[0];
+      validateAndSetFile(selectedFile);
+    }
+  };
+  
+  // Remove validateAndUploadFile since we'll use handleUpload for both cases
+  
+  // Update handleReplace to show the upload interface
+  const handleReplace = () => {
+    setIsReplacing(true);
+    setFile(null);
+    fileInputRef.current?.click();
+  };
+  
+  // Update the CardContent render condition
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
@@ -98,27 +112,47 @@ export default function UploadResumePage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {resume ? (
+          {resume && !isReplacing ? (
+            // Success state - show uploaded resume
             <div className="bg-green-50 border border-green-100 rounded-lg p-6 text-center">
               <CheckCircle className="h-12 w-12 text-success mx-auto mb-4" />
               <h3 className="text-lg font-medium mb-2">Resume Uploaded</h3>
               <p className="text-sm text-gray-500 mb-6">
                 Your resume: <strong>{resume.fileName}</strong> is stored
               </p>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept=".pdf,.docx"
+                className="hidden"
+              />
               <Button 
                 variant="outline"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={handleReplace}
               >
                 Replace Resume
               </Button>
             </div>
+          ) : isReplacing && file ? (
+            // Show store button after file selection in replace mode
+            <div className="bg-green-50 border border-green-100 rounded-lg p-6 text-center">
+              <h3 className="text-lg font-medium mb-2">{file.name}</h3>
+              <p className="text-sm text-gray-500 mb-6">
+                {`${(file.size / 1024 / 1024).toFixed(2)}MB`}
+              </p>
+              <Button 
+                onClick={handleUpload}
+                disabled={isUploading}
+              >
+                {isUploading ? "Storing..." : "Store Resume"}
+              </Button>
+            </div>
           ) : (
-            <div
-              className={`border-2 border-dashed rounded-lg p-12 text-center ${
-                isDragging 
-                  ? 'border-primary bg-primary/10' 
-                  : 'border-gray-300 hover:border-primary'
-              }`}
+            // Original drag & drop interface for first upload
+            <div className={`border-2 border-dashed rounded-lg p-12 text-center ${
+              isDragging ? 'border-primary bg-primary/10' : 'border-gray-300 hover:border-primary'
+            }`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
@@ -163,3 +197,5 @@ export default function UploadResumePage() {
     </div>
   );
 }
+
+

@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ResumeProvider } from "./contexts/ResumeContext";
-import { NotificationProvider } from "./contexts/NotificationContext";
 import { AppLayout } from "./components/Layout/AppLayout";
 import WelcomePage from "./pages/Auth/WelcomePage";
 import LoginPage from "./pages/Auth/LoginPage";
@@ -13,7 +12,6 @@ import SignupPage from "./pages/Auth/SignupPage";
 import DashboardPage from "./pages/Dashboard/DashboardPage";
 import UploadResumePage from "./pages/Resume/UploadResumePage";
 import ApplicationStatusPage from "./pages/Applications/ApplicationStatusPage";
-import NotificationsPage from "./pages/Notifications/NotificationsPage";
 import ContactPage from "./pages/Contact/ContactPage";
 import ProfilePage from "./pages/Profile/ProfilePage";
 import NotFound from "./pages/NotFound";
@@ -26,8 +24,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <ResumeProvider>
-        <NotificationProvider>
-          <TooltipProvider>
+        <TooltipProvider>
             <Toaster />
             <Sonner />
             <BrowserRouter>
@@ -41,7 +38,6 @@ const App = () => (
                   <Route path="/upload-resume" element={<UploadResumePage />} />
                   <Route path="/job-listings" element={<JobListingsPage />} />
                   <Route path="/applications" element={<ApplicationStatusPage />} />
-                  <Route path="/notifications" element={<NotificationsPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/contact" element={<ContactPage />} />
                 </Route>
@@ -51,7 +47,6 @@ const App = () => (
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
-        </NotificationProvider>
       </ResumeProvider>
     </AuthProvider>
   </QueryClientProvider>

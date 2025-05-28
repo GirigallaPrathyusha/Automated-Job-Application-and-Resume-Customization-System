@@ -7,12 +7,10 @@ import {
   Upload,
   Briefcase,
   FileText,
-  Bell,
   Settings,
   MessageCircle,
   ChevronRight
 } from 'lucide-react';
-import { useNotifications } from '@/contexts/NotificationContext';
 
 interface SidebarProps {
   className?: string;
@@ -53,7 +51,6 @@ const NavItem = ({ to, icon, label, badge }: NavItemProps) => (
 
 export function Sidebar({ className }: SidebarProps) {
   const [expanded, setExpanded] = useState(true);
-  const { unreadCount } = useNotifications();
   
   return (
     <div
@@ -90,12 +87,7 @@ export function Sidebar({ className }: SidebarProps) {
               <NavItem to="/upload-resume" icon={<Upload className="h-5 w-5" />} label="Upload Resume" />
               <NavItem to="/job-listings" icon={<Briefcase className="h-5 w-5" />} label="Job Listings" />
               <NavItem to="/applications" icon={<FileText className="h-5 w-5" />} label="Applications" />
-              <NavItem 
-                to="/notifications" 
-                icon={<Bell className="h-5 w-5" />} 
-                label="Notifications" 
-                badge={unreadCount}
-              />
+
               <NavItem to="/profile" icon={<Settings className="h-5 w-5" />} label="Settings" />
               <NavItem to="/contact" icon={<MessageCircle className="h-5 w-5" />} label="Contact" />
             </>
@@ -105,12 +97,7 @@ export function Sidebar({ className }: SidebarProps) {
               <NavItem to="/upload-resume" icon={<Upload className="h-5 w-5" />} label="" />
               <NavItem to="/job-listings" icon={<Briefcase className="h-5 w-5" />} label="" />
               <NavItem to="/applications" icon={<FileText className="h-5 w-5" />} label="" />
-              <NavItem 
-                to="/notifications" 
-                icon={<Bell className="h-5 w-5" />} 
-                label="" 
-                badge={unreadCount}
-              />
+
               <NavItem to="/profile" icon={<Settings className="h-5 w-5" />} label="" />
               <NavItem to="/contact" icon={<MessageCircle className="h-5 w-5" />} label="" />
             </>

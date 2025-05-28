@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -6,17 +5,36 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import emailjs from '@emailjs/browser';
 
 export default function ContactPage() {
   const { toast } = useToast();
+  const form = React.useRef<HTMLFormElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would send the data to a server
-    toast({
-      title: "Message sent successfully",
-      description: "We'll get back to you as soon as possible.",
-    });
+    
+    if (!form.current) return;
+
+    // Replace these with your actual EmailJS credentials
+    const serviceID = 'service_aloa5gl';
+    const templateID = 'template_kwahd7y';
+    const publicKey = 'K2GKR9x5VmEshYwLJ';
+
+    emailjs.sendForm(serviceID, templateID, form.current, publicKey)
+      .then((result) => {
+        toast({
+          title: "Message sent successfully",
+          description: "We'll get back to you as soon as possible.",
+        });
+        form.current?.reset();
+      }, (error) => {
+        toast({
+          title: "Failed to send message",
+          description: error.text || "Please try again later.",
+          variant: "destructive"
+        });
+      });
   };
 
   return (
@@ -33,21 +51,33 @@ export default function ContactPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form ref={form} onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-medium" htmlFor="name">Name</label>
-              <Input id="name" placeholder="Your name" required />
+              <Input 
+                id="name" 
+                name="from_name" 
+                placeholder="Your name" 
+                required 
+              />
             </div>
             
             <div className="space-y-2">
               <label className="text-sm font-medium" htmlFor="email">Email</label>
-              <Input id="email" type="email" placeholder="Your email" required />
+              <Input 
+                id="email" 
+                type="email" 
+                name="from_email" 
+                placeholder="Your email" 
+                required 
+              />
             </div>
             
             <div className="space-y-2">
               <label className="text-sm font-medium" htmlFor="message">How can we help?</label>
               <Textarea 
                 id="message" 
+                name="message" 
                 placeholder="Tell us about your issue or question"
                 className="min-h-[150px]"
                 required 

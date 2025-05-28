@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bell, LogOut, Search, X } from 'lucide-react';
+import { LogOut, Search, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNotifications } from '@/contexts/NotificationContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface HeaderProps {
   showSearchBar?: boolean;
@@ -12,7 +11,6 @@ interface HeaderProps {
 
 export function Header({ showSearchBar = true }: HeaderProps) {
   const { user, logout } = useAuth();
-  const { unreadCount } = useNotifications();
   const navigate = useNavigate();
   
   const handleLogout = () => {
@@ -20,12 +18,12 @@ export function Header({ showSearchBar = true }: HeaderProps) {
     navigate('/');
   };
   
-  const getInitials = (name1?: string, name2?: string) => {
-    const first = (name1 || '').charAt(0).toUpperCase();
-    const last = (name2 || '').charAt(0).toUpperCase();
-    return `${first}${last}`;
+  const getInitials = () => {
+    const firstName = user?.user_metadata?.first_name || '';
+    const first = firstName.charAt(0).toUpperCase();
+    return `${first}`;
   };
-  
+
   return (
     <header className="h-14 border-b border-border bg-background px-4 flex items-center justify-between">
       {showSearchBar ? (
@@ -43,30 +41,36 @@ export function Header({ showSearchBar = true }: HeaderProps) {
       )}
       
       <div className="flex items-center space-x-4">
-        <Link to="/notifications" className="relative p-2 rounded-full hover:bg-accent">
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <span className="absolute top-0 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-error text-[10px] font-medium text-white">
-              {unreadCount}
-            </span>
-          )}
-        </Link>
-        
         <Link to="/profile" className="flex items-center">
           <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-primary text-white">
-              {getInitials(user?.firstName, user?.lastName)}
+            <AvatarFallback className="text-2xl bg-appPurple text-white">
+              {getInitials()}
             </AvatarFallback>
           </Avatar>
         </Link>
         
-        <button
-          onClick={handleLogout}
-          className="p-2 rounded-full hover:bg-accent"
-          title="Logout"
-        >
-          <LogOut className="h-5 w-5" />
-        </button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button
+              className="p-2 rounded-full hover:bg-accent"
+              title="Logout"
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure you want to logout?</AlertDialogTitle>
+              <AlertDialogDescription>
+                You will need to login again to access your account.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleLogout}>Logout</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </header>
   );
